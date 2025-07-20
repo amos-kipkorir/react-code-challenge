@@ -1,0 +1,13 @@
+{
+  "goals": [
+    {
+      "id": "6",
+      "name": "Education Fund",
+      "targetAmount": 20000,
+      "savedAmount": 5000,
+      "category": "Education",
+      "deadline": "2028-01-01",
+      "createdAt": "2024-04-20"
+    }
+  ]
+}

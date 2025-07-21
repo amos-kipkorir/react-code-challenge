@@ -1,15 +1,15 @@
 {
-  "homepage": "https://amos-kipkorir.github.io/react-code-challenge/",
+  
   "name": "react-code-challenge",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://amos-kipkorir.github.io/react-code-challenge/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "json-server --watch db.json --port 3000",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
 

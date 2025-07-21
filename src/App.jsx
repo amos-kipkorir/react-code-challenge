@@ -1,5 +1,5 @@
 // src/App.js
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import GoalDashboard from './components/GoalDashboard';
 import './App.css';
 
@@ -11,7 +11,8 @@ function App() {
         <p>Track and achieve your financial goals</p>
       </header>
       <main>
-        <GoalDashboard />
+        {/* <GoalDashboard /> */}
+        <p>Dashboard placeholder</p>
       </main>
       <footer>
         <p>© 2025 FinTech Solutions. All rights reserved.</p>

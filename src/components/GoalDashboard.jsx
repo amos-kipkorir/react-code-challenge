@@ -13,9 +13,32 @@ function GoalDashboard() {
   const [error, setError] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  // Fetch goals from the API
   useEffect(() => {
     const fetchGoals = async () => {
+      // ✅ Use fallback goals in production (GitHub Pages)
+      if (import.meta.env.PROD) {
+        console.warn('Using fallback data in production mode');
+        setGoals([
+          {
+            id: 1,
+            title: 'Money',
+            targetAmount: 2000,
+            savedAmount: 500,
+            createdAt: '2025-01-01',
+          },
+          {
+            id: 2,
+            title: 'New',
+            targetAmount: 1500,
+            savedAmount: 300,
+            createdAt: '2025-03-15',
+          }
+        ]);
+        setIsLoading(false);
+        return;
+      }
+
+      // ✅ Otherwise fetch from local json-server
       try {
         const response = await fetch(API_URL);
         if (!response.ok) {
@@ -25,6 +48,7 @@ function GoalDashboard() {
         setGoals(data);
         setIsLoading(false);
       } catch (err) {
+        console.error(err);
         setError(err.message);
         setIsLoading(false);
       }
@@ -35,23 +59,20 @@ function GoalDashboard() {
 
   // Add a new goal
   const addGoal = async (newGoal) => {
+    if (import.meta.env.PROD) return; // skip in production
     try {
       const response = await fetch(API_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...newGoal,
           savedAmount: 0,
           createdAt: new Date().toISOString().split('T')[0],
         }),
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to add goal');
-      }
-      
+
+      if (!response.ok) throw new Error('Failed to add goal');
+
       const addedGoal = await response.json();
       setGoals([...goals, addedGoal]);
       setShowAddForm(false);
@@ -60,21 +81,17 @@ function GoalDashboard() {
     }
   };
 
-  // Update an existing goal
   const updateGoal = async (id, updatedData) => {
+    if (import.meta.env.PROD) return;
     try {
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData),
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update goal');
-      }
-      
+
+      if (!response.ok) throw new Error('Failed to update goal');
+
       const updatedGoal = await response.json();
       setGoals(goals.map(goal => goal.id === id ? updatedGoal : goal));
     } catch (err) {
@@ -82,43 +99,37 @@ function GoalDashboard() {
     }
   };
 
-  // Delete a goal
   const deleteGoal = async (id) => {
+    if (import.meta.env.PROD) return;
     try {
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'DELETE',
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete goal');
-      }
-      
+
+      if (!response.ok) throw new Error('Failed to delete goal');
+
       setGoals(goals.filter(goal => goal.id !== id));
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // Add a deposit to a goal
   const addDeposit = async (id, amount) => {
+    if (import.meta.env.PROD) return;
     try {
       const goal = goals.find(g => g.id === id);
       if (!goal) return;
-      
+
       const newSavedAmount = parseFloat(goal.savedAmount) + parseFloat(amount);
-      
+
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ savedAmount: newSavedAmount }),
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to add deposit');
-      }
-      
+
+      if (!response.ok) throw new Error('Failed to add deposit');
+
       const updatedGoal = await response.json();
       setGoals(goals.map(g => g.id === id ? updatedGoal : g));
     } catch (err) {
@@ -126,34 +137,26 @@ function GoalDashboard() {
     }
   };
 
-  if (isLoading) {
-    return <div className="loading">Loading goals...</div>;
-  }
-
-  if (error) {
-    return <div className="error">Error: {error}</div>;
-  }
+  if (isLoading) return <div className="loading">Loading goals...</div>;
+  if (error) return <div className="error">Error: {error}</div>;
 
   return (
     <div className="goal-dashboard">
       <GoalOverview goals={goals} />
-      
+
       <div className="dashboard-controls">
-        <button 
-          className="add-goal-btn"
-          onClick={() => setShowAddForm(!showAddForm)}
-        >
+        <button className="add-goal-btn" onClick={() => setShowAddForm(!showAddForm)}>
           {showAddForm ? 'Cancel' : 'Add New Goal'}
         </button>
       </div>
-      
+
       {showAddForm && <AddGoalForm onAddGoal={addGoal} />}
-      
-      <GoalList 
-        goals={goals} 
-        onUpdateGoal={updateGoal} 
-        onDeleteGoal={deleteGoal} 
-        onAddDeposit={addDeposit} 
+
+      <GoalList
+        goals={goals}
+        onUpdateGoal={updateGoal}
+        onDeleteGoal={deleteGoal}
+        onAddDeposit={addDeposit}
       />
     </div>
   );
